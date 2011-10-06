@@ -37,11 +37,23 @@ body {width: 100%; height: 100%;}
 .dropper.dragover
 {
   border-color: orange;
+  cursor: s-resize; /* cursor arrwo down */
+}
+.dropper.success
+{
+  border-color: green;
 }
 
 /* ========= */
 /* = Filer = */
 /* ========= */
+.filer:hover,
+.dropper:hover,
+.paster:hover
+{
+  border-color: hsl(33, 100%, 50%);
+  background-color: hsla(0, 100%, 95%, 0.5);
+}
 .filer.success
 {
   border-color: green;
@@ -53,4 +65,5 @@ body {width: 100%; height: 100%;}
 .filer.unsupported
 {
   text-decoration: line-through;
+  cursor: none;
 }

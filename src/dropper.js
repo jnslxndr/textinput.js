@@ -26,7 +26,7 @@ $(function() {
     this.bind("selectstart", function(event) {
       return typeof event.preventDefault === "function" ? event.preventDefault() : void 0;
     });
-    this.bind("dragover", function(event) {
+    this.removeClass("loaded success dragover dropped").bind("dragover", function(event) {
       if (typeof event.preventDefault === "function") {
         event.preventDefault();
       }
@@ -34,65 +34,21 @@ $(function() {
       $(this).addClass("dragover").removeClass("dropped");
       return false;
     }).bind("mouseout dragend", function() {
-      return $(this).removeClass("dragover,dropped");
+      return $(this).removeClass("dragover dropped");
     });
     return this.bind("drop", __bind(function(event) {
       var file, reader;
       $(this).removeClass("dragover").addClass("dropped");
       event.stopPropagation();
       event.preventDefault();
-      console.log(event);
       file = event.dataTransfer.files[0];
-      console.log(file, callback);
-      if (this.DEBUG) {
-        try {
-          console.log("" + file.name + ", " + file.type + " (" + file.size + ", " + (file.lastModifiedDate.toLocaleDateString()) + ")");
-        } catch (error) {
-          console.log("ups", "" + file.name + ", " + file.type + " (" + file.size + ")");
-        }
-      }
-      reader = new FileReader();
-      reader.onloadstart = function(event) {
-        if (this.DEBUG) {
-          console.log("onloadstart", event);
-        }
-        return typeof callback.start === "function" ? callback.start(event) : void 0;
-      };
-      reader.onprogress = function(event) {
-        if (this.DEBUG) {
-          console.log("onprogress", event);
-        }
-        return typeof callback.progress === "function" ? callback.progress(event) : void 0;
-      };
-      reader.onload = function(event) {
-        if (this.DEBUG) {
-          console.log("onload", event);
-        }
-        return typeof callback.load === "function" ? callback.load(event) : void 0;
-      };
-      reader.onabort = function(event) {
-        if (this.DEBUG) {
-          console.log("onabort", event);
-        }
-        return typeof callback.abort === "function" ? callback.abort(event) : void 0;
-      };
-      reader.onerror = function(event) {
-        if (this.DEBUG) {
-          console.log("onerror", event);
-        }
-        return typeof callback.error === "function" ? callback.error(event) : void 0;
-      };
-      reader.onloadend = __bind(function(event) {
-        var istext, suffix;
-        $(this).addClass("loaded");
-        if (this.DEBUG) {
-          console.log("onloadend", event);
-        }
-        suffix = file.name.split(".").reverse()[0];
-        istext = /text/i.test(file.type);
-        return typeof callback.success === "function" ? callback.success(event.target.result, file.name, suffix, istext) : void 0;
-      }, this);
-      return reader.readAsText(file);
+      reader = new TextFileReader();
+      reader.bind(callback, {
+        always: __bind(function(event) {
+          return $(this).addClass(event.type);
+        }, this)
+      });
+      return reader.read(file);
     }, this));
   };
 });
