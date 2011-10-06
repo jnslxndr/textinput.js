@@ -1,5 +1,4 @@
 Major:
-- Factor out file reading from dropper.js and filer.js into own module
 - write README and how to use
 
 Minor:

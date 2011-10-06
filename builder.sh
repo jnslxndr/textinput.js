@@ -11,7 +11,7 @@ mkdir -p ./build
 NAME=./../build/$NAME
 
 # compile again:
-coffee -c src/*.js
+coffee -c src/*.coffee
 
 # Options see: https://github.com/mishoo/UglifyJS
 cd src && cat $FILES | uglifyjs -mt > $NAME && cd ..
