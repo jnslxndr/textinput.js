@@ -2,31 +2,24 @@
   Filer helps you to retrieve data from files, you select via a dialog
   ... but nice and styled
   
+  @dependson TextFileReader.js
+  
   licensed under the unlicense
   jens alexander ewald, 2011, ififelse.net
 !###
-
-# ==================================
-# = Make sure we have the support: =
-# ==================================
-window.filersupport = false
-try
-  window.filersupport = FileReader? and File?
-catch error
-  FileReader = File = false
 
 $ ->
   
   $.fn.filer = (callback,filetypes) ->
     @addClass "filer"
     
-    unless window.filersupport
+    # does it work?
+    unless TextFileReader? and TextFileReader.works?
       @addClass "unsupported"
       console.error "FILE OBJECTS NOT SUPPORTED"
       return @
     
-    @DEBUG = false
-    
+    # init:
     @bind "selectstart", (event) -> event.preventDefault?()
     input = $('<input type="file" style="position:absolute; top: -999999px;" id="filerhelper">')
     input = $(input).appendTo($('body').remove('#filerhelper'))
@@ -34,6 +27,38 @@ $ ->
       $(@).removeClass('success loaded')
       input.click()
       return false
+    
+    # ===========================================
+    # = The internal callback for styling state =
+    # ===========================================
+    internal_cb =
+      success: (event) => 
+        console.log "adding class success"
+        $(@).addClass("success")
+      always: (event) => 
+        # remove all classes with on** before we enter a fresh read
+        console.log "filer reports on event: ",event.type
+        $(@)
+        .removeClass (index, klass) -> 
+          result = []
+          f = null
+          r = /on\w+/gi
+          # search globally
+          while f = r.exec(klass) 
+            result.push f[0]
+          result.map((el) -> $.trim(el)).join(" ")
+        .addClass("on#{event.type}")
+    
+    # ================================
+    # = Instantiate a TextFileReader =
+    # ================================
+    @reader = new TextFileReader()
+    @reader.DEBUG = true
+    # first bind some styling callback
+    @reader.bind internal_cb
+    # then bind the given callbacks
+    @reader.bind callback
+    
     
     # ===================================
     # = This is where the magic happens =
@@ -45,50 +70,21 @@ $ ->
       return false unless file
       
       # = do some type checking
-      if filetypes?
-        filetypes = [filetypes] if not (filetypes instanceof Array)
-        return false unless file.type in filetypes
+      # if filetypes?
+      #   filetypes = [filetypes] if not (filetypes instanceof Array)
+      #   return false unless file.type in filetypes
       
       # = we are lucky and can process
       $(@).addClass("success")
       
+      # if @DEBUG
+      #   try
+      #     console.log "#{file.name}, #{file.type} (#{file.size}, #{file.lastModifiedDate.toLocaleDateString()})"
+      #   catch error
+      #     console.log "ups", "#{file.name}, #{file.type} (#{file.size})"
       
-      console.log file
+      # and read it
+      @reader.read file if file?
       
-      if @DEBUG
-        try
-          console.log "#{file.name}, #{file.type} (#{file.size}, #{file.lastModifiedDate.toLocaleDateString()})"
-        catch error
-          console.log "ups", "#{file.name}, #{file.type} (#{file.size})"
-      
-      # ======================================================
-      # = Read the file and call callback with text or bytes =
-      # ======================================================
-      reader = new FileReader()
-      reader.onloadstart = (event) ->
-        console.log "onloadstart",event if @DEBUG
-        callback.start?(event)
-      reader.onprogress = (event) ->
-        console.log "onprogress", event if @DEBUG
-        callback.progress?(event)
-      reader.onload = (event) ->
-        console.log "onload",event if @DEBUG
-        callback.load?(event)
-      reader.onabort = (event) ->
-        console.log "onabort",event if @DEBUG
-        callback.abort?(event)
-      reader.onerror = (event) ->
-        console.log "onerror",event if @DEBUG
-        callback.error?(event)
-      reader.onloadend = (event) =>
-        $(@).addClass("loaded")
-        console.log "onloadend",event if @DEBUG
-        [suffix,] = file.name.split(".").reverse()
-        istext = /text/i.test file.type
-        console.log callback,callback.success
-        callback.success?(event.target.result,file.name,suffix,istext)
-      
-      # Start to read:
-      reader.readAsText file
-      
-      
+      # return nothing
+      return null
