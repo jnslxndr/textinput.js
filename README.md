@@ -29,3 +29,8 @@ See index.html for uncombined use and build-test.html for compiled use. Also see
 
 Please file issues and requests here on github!
 
+
+
+## License
+
+The unlicense applies http://unlicense.org/
