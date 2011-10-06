@@ -46,11 +46,9 @@ $ ->
     # ===========================================
     internal_cb =
       success: (event) => 
-        console.log "adding class success"
         $(@).addClass("success")
       always: (event) => 
         # remove all classes with on** before we enter a fresh read
-        console.log "filer reports on event: ",event.type
         $(@)
         .removeClass (index, klass) -> 
           result = []
@@ -66,7 +64,7 @@ $ ->
     # = Instantiate a TextFileReader =
     # ================================
     @reader = new TextFileReader()
-    @reader.DEBUG = true
+    
     # first bind some styling callback
     @reader.bind internal_cb
     # then bind the given callbacks
