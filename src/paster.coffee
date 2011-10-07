@@ -13,8 +13,7 @@ $ ->
       $(@).click (event) ->
         $(@).find("textarea").remove()
         $(@).addClass("ready")
-        dummy = $('<textarea style="position:absolute;left:-9999px;top:-99999em;width:0!important;height:0!important;"/>').appendTo $(@)
-        # dummy = $('<textarea style="position:absolute;"/>').appendTo $(@)
+        dummy = $('<textarea style="position:absolute;border:none;left:-9999px;width:0!important;height:0!important;z-index:-9999!important;"/>').appendTo $(@)
         dummy.val("")
         dummy.focus()
         
