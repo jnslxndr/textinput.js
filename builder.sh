@@ -14,5 +14,8 @@ NAME=./../build/$NAME
 coffee -c src/*.coffee
 
 # Options see: https://github.com/mishoo/UglifyJS
-cd src && cat $FILES | uglifyjs -mt > $NAME && cd ..
+# cd src && cat $FILES | uglifyjs -mt > $NAME && cd ..
+
+# uglify does not work
+cd src && cat $FILES > $NAME && cd ..
 
