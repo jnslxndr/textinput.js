@@ -21,7 +21,9 @@ $ ->
     
     # init:
     @bind "selectstart", (event) -> event.preventDefault?()
-    input = $('<input type="file" style="position:absolute; top: -999999px;" id="filerhelper">')
+    filetypes = filetypes ? []
+    accept = filetypes.join(", ")
+    input = $('<input type="file" accept="'+accept+'" style="position:absolute; top: -999999px;" id="filerhelper">')
     input = $(input).appendTo($('body').remove('#filerhelper'))
     @.click (event) =>
       $(@).removeClass('success loaded')
