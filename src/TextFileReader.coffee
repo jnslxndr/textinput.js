@@ -47,6 +47,14 @@ class window.TextFileReader
   read: (@file) ->
     return false if not @supported()
     filereader = new FileReader()
+    
+    unless /text/i.test @file.type
+      eevent = 
+        type: "error"
+        code: TextFileReader.ERRORS.MIME_TYPE_NOT_SUPPORTED
+        data: "Filetype not allowed"
+      cb?(eevent) for cb in @callbacks.error if @callbacks.error?
+      return false
       
     # TODO Refactor with generic method and static array of events
     
@@ -78,8 +86,8 @@ class window.TextFileReader
     filereader.onloadend = (event) =>
       console.log "onloadend",event if @DEBUG
       
-      [suffix,] = file.name.split(".").reverse()
-      istext = /text/i.test file.type
+      [suffix,] = @file.name.split(".").reverse()
+      istext = /text/i.test @file.type
       
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.loadend if @callbacks.loadend?
@@ -104,4 +112,6 @@ class window.TextFileReader
 # ==============
 # = Add a test =
 # ==============
-window.TextFileReader.works = new TextFileReader().supported()
+window.TextFileReader.works  = new TextFileReader().supported()
+window.TextFileReader.ERRORS =
+  MIME_TYPE_NOT_SUPPORTED:"MIME_TYPE_NOT_SUPPORTED"
