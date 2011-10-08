@@ -66,27 +66,24 @@ $ ->
     # = This is where the magic happens =
     # ===================================
     input.change (event) =>
+      event.stopPropagation?()
       event.preventDefault?()
       
       [file,] = event.target.files
       return false unless file
       
-      # = do some type checking
-      # if filetypes?
-      #   filetypes = [filetypes] if not (filetypes instanceof Array)
-      #   return false unless file.type in filetypes
-      
-      # = we are lucky and can process
-      $(@).addClass("success")
-      
-      # if @DEBUG
-      #   try
-      #     console.log "#{file.name}, #{file.type} (#{file.size}, #{file.lastModifiedDate.toLocaleDateString()})"
-      #   catch error
-      #     console.log "ups", "#{file.name}, #{file.type} (#{file.size})"
-      
       # and read it
-      @reader.read file if file?
+      @reader.DEBUG = true if $(@).data("debug")
+      
+      # data-encoding attribute:
+      encoding = $(@).data('encoding') ? encoding
+      # TODO Implement this as data-accept attribute with comma separated list
+      mimes = $(@).data('mimes') ? mimes
+      
+      @reader.setAllowedFileTypes mimes...
+      callback.start?()
+      # and read it
+      setTimeout (=>@reader.read(file,encoding)),1 if file?
       
       # return nothing
       return null

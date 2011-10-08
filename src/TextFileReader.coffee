@@ -25,6 +25,8 @@ class window.TextFileReader
       success:   []
       always:    []
     
+    @mimes = ["text/plain","text"]
+    @encoding = "utf-8" # could also be null, defaults to utf-8
     @supported()
   
   setDebug: (@DEBUG) ->
@@ -43,16 +45,34 @@ class window.TextFileReader
   add_cb: (cb) ->
     for event,func of cb
       @callbacks[event].push?(func) if @callbacks[event]?
-
-  read: (@file) ->
+  
+  setEncoding: (@encoding) ->
+  setAllowedFileTypes: (mimes...) ->
+    @mimes = mimes ? @mimes
+  addAllowedFileTypes: (mimes...) ->
+    return unless mimes?
+    @mimes.push mime for mime in mimes
+  
+  read: (@file,encoding) ->
+    @encoding = encoding ? @enconding
     return false if not @supported()
     filereader = new FileReader()
     
-    unless /text/i.test @file.type
+    supported_mimes = []
+    for mime in @mimes
+      r = new RegExp(mime,"i")
+      supported_mimes.push r.test @file.type
+    
+    console?.log @mimes,supported_mimes if @DEBUG
+    
+    # unless /text/i.test @file.type
+    unless true in supported_mimes
       eevent = 
         type: "error"
         code: TextFileReader.ERRORS.MIME_TYPE_NOT_SUPPORTED
         data: "Filetype not allowed"
+        giventype: @file.type
+        target: @
       cb?(eevent) for cb in @callbacks.error if @callbacks.error?
       return false
       
@@ -95,8 +115,11 @@ class window.TextFileReader
         for cb in @callbacks.success
           cb?(event.target.result,file.name,suffix,istext)
     
+    console?.log "Mime Types: ",@mimes,supported_mimes if @DEBUG
+    console?.log "Using Encoding: ",@encoding if @DEBUG
+    
     # Start to read:
-    filereader.readAsText @file
+    filereader.readAsText @file, @encoding
     
   errorHandler: (evt) ->
     switch evt.target.error.code

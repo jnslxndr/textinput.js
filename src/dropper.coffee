@@ -10,7 +10,11 @@
 
 
 $ ->
-  $.fn.dropper = (callback) ->
+  $.fn.setEncoding = (encoding) ->
+    @data('encoding',encoding)
+  
+  $.fn.dropper = (callback,encoding,mimes) ->
+    @setEncoding encoding
     # style:
     @addClass "dropper"
     
@@ -87,8 +91,17 @@ $ ->
       # =======================
       [file,] = event.dataTransfer.files
       
+      @reader.DEBUG = $(@).data("debug")?
+      
+      # data-encoding attribute:
+      encoding = $(@).data('encoding') ? encoding
+      # TODO Implement this as data-accept attribute with comma separated list
+      mimes = $(@).data('mimes') ? mimes
+      @reader.setAllowedFileTypes mimes...
+      
+      callback.start?()
       # and read it
-      @reader.read file if file?
+      setTimeout (=>@reader.read(file,encoding)),1 if file?
       
       # return nothing
       return null
