@@ -27,35 +27,6 @@
       <script src="js/script.js"></script>
       <link rel="stylesheet" href="css/styles.css">
     
-      <!-- ================= -->
-      <!-- = The Templates = -->
-      <!-- ================= -->
-      <script id="address-preview" type="text/template">
-        <div class="address">
-          <h2 class="Firmenname">${firmenname}:</h2>
-          <ul>
-            <li>
-              <ul>
-                <li class="Haendlerkennung">${haendlerkennung}</li>
-                <li class="Ansprechpartner">${ansprechpartner}</li>
-                <li class="StrasseHausnummer">${strassehausnummer}</li>
-                <li class="PLZ">${plz}</li>
-                <li class="Stadt">${stadt}</li>
-                <li class="Land">${land} (${laenderkennung})</li>
-              </ul>
-            </li>
-            <li>
-              <ul>
-                <li class="Telefon">${telefon}</li>
-                <li class="Fax">${fax}</li>
-                <li class="Internetadresse">${internetadresse}</li>
-                <li class="Emailadresse">${emailadresse}</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </script>
-    
     </head>
     <body>
       <div id="pastehere">
@@ -66,7 +37,7 @@
         <h1>Drop a File here</h1>
       </div>
       <hr/>
-      <div id="filehere">
+      <div id="filehere" data-debug="true">
         <h1>Click here to select a file</h1>
       </div>
     </body>

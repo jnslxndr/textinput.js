@@ -6,12 +6,12 @@ $ ->
     console.log "PASTER: ",data
   
   $('#drophere').dropper
-    error: (errro) ->
+    error: (error) ->
       console.log "FILER error ",error
     success: showdata
   
   $('#filehere').filer
-    error: (errro) ->
+    error: (error) ->
       console.log "FILER error ",error
     success: showdata
   
