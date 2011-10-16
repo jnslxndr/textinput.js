@@ -99,6 +99,7 @@ class window.TextFileReader
       cb?(event) for cb in @callbacks.abort if @callbacks.abort?
       
     filereader.onerror = (event) =>
+      @errorHandler(event) if @DEBUG
       console.log "onerror",event if @DEBUG
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.error if @callbacks.error?
@@ -118,19 +119,22 @@ class window.TextFileReader
     console?.log "Mime Types: ",@mimes,supported_mimes if @DEBUG
     console?.log "Using Encoding: ",@encoding if @DEBUG
     
+    # fixes a bug in FF - NOT_READABLE_ERR
+    @encoding = if @encoding is undefined or not typeof @encoding isnt "string" then null else @encoding
+    
     # Start to read:
     filereader.readAsText @file, @encoding
     
   errorHandler: (evt) ->
     switch evt.target.error.code
       when evt.target.error.NOT_FOUND_ERR
-        alert "Datei konnte nicht gefunden werden."
+        console.error "Datei konnte nicht gefunden werden."
       when evt.target.error.NOT_READABLE_ERR
-        alert "Datei kann nicht gelesen werden."
+        console.error "Datei kann nicht gelesen werden."
       when evt.target.error.ABORT_ERR
-        alert "Abgebrochen."
+        console.error  "Abgebrochen."
       else
-        alert "Ein unbekannter Fehler ist aufgetreten."
+        console.error "Ein unbekannter Fehler ist aufgetreten."
 
 # ==============
 # = Add a test =
