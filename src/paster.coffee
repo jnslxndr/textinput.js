@@ -11,12 +11,9 @@ $ ->
       $(@).addClass "paster"
       $(@).find("textarea").remove()
       $(@).click (event) ->
-        $(@).find("textarea").remove()
         $(@).addClass("ready")
-        dummy = $('<textarea style="position:absolute;border:none;left:-9999px;width:0!important;height:0!important;z-index:-9999!important;"/>').appendTo $(@)
-        dummy.val("")
-        dummy.focus()
-        
+        $(@).find("textarea").remove()
+        dummy = $('<textarea style="position:absolute;border:none;width:1;height:1;z-index:-999;opacity:0;"/>').appendTo $(@)
         dummy.one "blur", (event) ->
           $(@).closest('.paster').removeClass("ready")
           $(@).remove()
@@ -39,4 +36,5 @@ $ ->
               callback?(data,event)
               $(@).remove() # remove the focus from the textfield
 
-  
+        dummy.val("")
+        dummy.focus()
