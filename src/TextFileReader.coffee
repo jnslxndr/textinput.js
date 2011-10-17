@@ -120,7 +120,7 @@ class window.TextFileReader
     console?.log "Using Encoding: ",@encoding if @DEBUG
     
     # fixes a bug in FF - NOT_READABLE_ERR
-    @encoding = if @encoding is undefined or not typeof @encoding isnt "string" then null else @encoding
+    @encoding = if @encoding is undefined or typeof @encoding isnt "string" then null else @encoding
     
     # Start to read:
     filereader.readAsText @file, @encoding
