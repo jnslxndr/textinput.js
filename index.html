@@ -3,7 +3,7 @@
     <head>
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-      
+
       <!-- ================ -->
       <!-- = Dependencies = -->
       <!-- ================ -->
@@ -12,7 +12,7 @@
       <script src="lib/helpers.js" type="text/javascript" charset="utf-8"></script>
       <script src="lib/ArrayHelpers.min.js"></script>
       <script src="lib/CSV.js" type="text/javascript" charset="utf-8"></script>
-    
+
       <!-- =========== -->
       <!-- = Plugins = -->
       <!-- =========== -->
@@ -20,24 +20,24 @@
       <script src="src/paster.js"></script>
       <script src="src/dropper.js"></script>
       <script src="src/filer.js"></script>
-    
+
       <!-- ==================== -->
       <!-- = Scripts & Styles = -->
       <!-- ==================== -->
       <script src="js/script.js"></script>
       <link rel="stylesheet" href="css/styles.css">
-    
+
     </head>
     <body>
       <div id="pastehere">
         <h1>Click here and hit <code>strg/cmd + v</code> to paste</h1>
       </div>
       <hr/>
-      <div id="drophere">
-        <h1>Drop a File here</h1>
+      <div id="drophere2" class="droppit" data-accept="application/vnd.ms-excel" data-binary="true" data-debug="true">
+        <h1>Drop a File here MS-DOS</h1>
       </div>
       <hr/>
-      <div id="filehere" data-debug="true">
+      <div id="filehere" data-accept="application/vnd.ms-excel" data-binary="true" data-debug="true">
         <h1>Click here to select a file</h1>
       </div>
     </body>

@@ -1,42 +1,42 @@
 ###!
-  Dropper helps you to read dropped files and retrieve its text value
+  Dropper.js – helps you to read dropped files and retrieve its text value
   ... but nice and styled
-  
-  @dependson TextFileReader.js
-  
-  licensed under the unlicense
-  jens alexander ewald, 2011, ififelse.net
+
+  @license the unlicense
+  @author jens alexander ewald, 2011-2014, lea.io
+  @version 0.2.0
+  @dependson FancyFileReader.js
 !###
 
 
 $ ->
   $.fn.setEncoding = (encoding) ->
     @data('encoding',encoding)
-  
+
   $.fn.dropper = (callback,encoding,mimes) ->
-    @setEncoding encoding
+    # @setEncoding encoding if encoding
     # style:
     @addClass "dropper"
-    
+
     # does it work?
-    unless TextFileReader? and TextFileReader.works?
+    unless FancyFileReader? and FancyFileReader.works?
       @addClass "unsupported"
       console.error "FILE OBJECTS NOT SUPPORTED"
       return @
-    
+
     # jQuery props
     jQuery.event.props.push("dataTransfer") # enable dataTransfer for events
-    
+
     # init:
     $(document).bind "dragover drop",(event) -> event.preventDefault?()
     @bind "selectstart", (event) -> event.preventDefault?()
-    
+
     # ===============
     # = Visual Cues =
     # ===============
     @
     .removeClass("loaded success dragover dropped")
-    .bind "dragover",(event) -> 
+    .bind "dragover",(event) ->
       event.preventDefault?()
       event.stopPropagation()
       $(@).addClass("dragover").removeClass "dropped"
@@ -49,31 +49,31 @@ $ ->
     # = The internal callback for styling state =
     # ===========================================
     internal_cb =
-      success: (event) => 
+      success: (event) =>
         $(@).addClass("success")
-      always: (event) => 
+      always: (event) =>
         # remove all classes with on** before we enter a fresh read
         $(@)
-        .removeClass (index, klass) -> 
+        .removeClass (index, klass) ->
           result = []
           f = null
           r = /on\w+/gi
           # search globally
-          while f = r.exec(klass) 
+          while f = r.exec(klass)
             result.push f[0]
           result.map((el) -> $.trim(el)).join(" ")
         .addClass("on#{event.type}")
-    
+
     # ================================
-    # = Instantiate a TextFileReader =
+    # = Instantiate a FancyFileReader =
     # ================================
-    @reader = new TextFileReader()
-    
+    @reader = new FancyFileReader()
+
     # first bind some styling callback
     @reader.bind internal_cb
     # then bind the given callbacks
     @reader.bind callback
-    
+
 
     # ===================
     # = The Drop itself =
@@ -82,27 +82,27 @@ $ ->
       # prevent default:
       event.stopPropagation()
       event.preventDefault()
-      
+
       # update styles:
       $(@).removeClass("dragover sucess").addClass "dropped"
-      
+
       # =======================
       # = Find the first File =
       # =======================
       [file,] = event.dataTransfer.files
-      
-      @reader.DEBUG = $(@).data("debug")?
-      
+      return false unless file
+
+      @reader.setDebug $(@).data("debug")
+
       # data-encoding attribute:
-      encoding = $(@).data('encoding') ? encoding
-      # TODO Implement this as data-accept attribute with comma separated list
-      mimes = $(@).data('mimes') ? mimes
-      @reader.setAllowedFileTypes mimes...
-      
+      encoding = $(@).data('encoding') ? @encoding
+      binary   = $(@).data('binary') ? !!@binary
+      if $(@).data('accept')
+        @reader.setAllowedFileTypes $(@).data('accept')
+
       callback.start?()
-      # and read it
-      setTimeout (=>@reader.read(file,encoding)),1 if file?
-      
+      # and read it defered
+      setTimeout (=>@reader.read(file,{encoding,binary})) , 1
+
       # return nothing
       return null
-      

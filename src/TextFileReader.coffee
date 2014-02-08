@@ -1,20 +1,21 @@
 ###!
-  A simple wrapper class to read File/Blob objects directly as text
-  
-  licensed under the unlicense
-  jens alexander ewald, 2011, ififelse.net
+  FancyFileReader – A simple wrapper class to read File/Blob objects
+
+  @license the unlicense
+  @author jens alexander ewald, 2011-2014, lea.io
+  @version 0.2.0
 !###
 
-# =====================================================================
-# = Native objects can not be extended in coffee script, due to apply =
-# =====================================================================
-class window.TextFileReader
+class window.FancyFileReader
   callbacks: {}
-  constructor: (@DEBUG) ->
-    return false unless TextFileReader.works?
-    
+  DEBUG: false
+  constructor: (DEBUG) ->
+    return false unless FancyFileReader.supported()
+
+    @reader = new FileReader()
+
     # intstantiate the callbacks
-    @callbacks = 
+    @callbacks =
       loadstart: []
       progress:  []
       load:      []
@@ -24,16 +25,17 @@ class window.TextFileReader
       # extra events hooked to internal
       success:   []
       always:    []
-    
+
     @mimes = ["text/plain","text"]
     @encoding = "utf-8" # could also be null, defaults to utf-8
-    @supported()
-  
-  setDebug: (@DEBUG) ->
+    @setDebug DEBUG #sanitize debug value passed in
+
+
+  setDebug: (@DEBUG) -> @DEBUG = !!@DEBUG
   enableDebug: () -> @setDebug(true)
   enableDebug: () -> @setDebug(false)
-  
-  supported: () ->
+
+  @supported: () ->
     try
       FileReader? and File?
     catch error
@@ -45,100 +47,107 @@ class window.TextFileReader
   add_cb: (cb) ->
     for event,func of cb
       @callbacks[event].push?(func) if @callbacks[event]?
-  
+
   setEncoding: (@encoding) ->
   setAllowedFileTypes: (mimes...) ->
+    return unless mimes?
+    mimes = if mimes.length is 1 then mimes[0].split?(',')
     @mimes = mimes ? @mimes
   addAllowedFileTypes: (mimes...) ->
     return unless mimes?
+    mimes = if mimes.length is 1 then mimes[0].split?(',')
     @mimes.push mime for mime in mimes
-  
-  read: (@file,encoding) ->
-    @encoding = encoding ? @enconding
-    return false if not @supported()
+
+  read: (@file, options) ->
+
+    encoding = options.encoding ? @enconding
+
+    return false unless FancyFileReader.supported()
     filereader = new FileReader()
-    
+
     supported_mimes = []
     for mime in @mimes
       r = new RegExp(mime,"i")
       supported_mimes.push r.test @file.type
-    
-    console?.log @mimes,supported_mimes if @DEBUG
-    
+
     # unless /text/i.test @file.type
     unless true in supported_mimes
-      eevent = 
+      eevent =
         type: "error"
-        code: TextFileReader.ERRORS.MIME_TYPE_NOT_SUPPORTED
-        data: "Filetype not allowed"
+        code: FancyFileReader.ERRORS.MIME_TYPE_NOT_SUPPORTED
+        data: "Filetype not supported"
         giventype: @file.type
         target: @
       cb?(eevent) for cb in @callbacks.error if @callbacks.error?
       return false
-      
+
     # TODO Refactor with generic method and static array of events
-    
+
     filereader.onloadstart = (event) =>
-      console.log "onloadstart",event if @DEBUG
+      if @DEBUG then console.log "onloadstart",event
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.start if @callbacks.start?
-      
+
     filereader.onprogress = (event) =>
-      console.log "onprogress", event if @DEBUG
+      if @DEBUG then console.log "onprogress", event
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.progress if @callbacks.progress?
-      
+
     filereader.onload = (event) =>
-      console.log "onload",event if @DEBUG
+      if @DEBUG then console.log "onload",event
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.load if @callbacks.load?
-      
+
     filereader.onabort = (event) =>
-      console.log "onabort",event if @DEBUG
+      if @DEBUG then console.log "onabort",event
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.abort if @callbacks.abort?
-      
+
     filereader.onerror = (event) =>
-      @errorHandler(event) if @DEBUG
-      console.log "onerror",event if @DEBUG
+      if @DEBUG then @errorHandler(event)
+      if @DEBUG then console.log "onerror",event
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.error if @callbacks.error?
-      
+
     filereader.onloadend = (event) =>
-      console.log "onloadend",event if @DEBUG
-      
+      if @DEBUG then console.log "onloadend",event
+
       [suffix,] = @file.name.split(".").reverse()
       istext = /text/i.test @file.type
-      
+
       cb?(event) for cb in @callbacks.always if @callbacks.always?
       cb?(event) for cb in @callbacks.loadend if @callbacks.loadend?
       if @callbacks.success?
         for cb in @callbacks.success
           cb?(event.target.result,file.name,suffix,istext)
-    
-    console?.log "Mime Types: ",@mimes,supported_mimes if @DEBUG
-    console?.log "Using Encoding: ",@encoding if @DEBUG
-    
+
+    if @DEBUG
+      console?.log "Mime Types: ",@mimes,supported_mimes
+      console?.log "Using Encoding: ",encoding
+
     # fixes a bug in FF - NOT_READABLE_ERR
-    @encoding = if @encoding is undefined or typeof @encoding isnt "string" then null else @encoding
-    
+    encoding = if encoding is undefined or typeof encoding isnt "string" then null else encoding
+
     # Start to read:
-    filereader.readAsText @file, @encoding
-    
+    if !!options.binary
+      filereader.readAsBinaryString @file
+    else
+      filereader.readAsText @file, encoding
+
   errorHandler: (evt) ->
     switch evt.target.error.code
       when evt.target.error.NOT_FOUND_ERR
-        console.error "Datei konnte nicht gefunden werden."
+        console.error "File not found."
       when evt.target.error.NOT_READABLE_ERR
-        console.error "Datei kann nicht gelesen werden."
+        console.error "Cannot read file."
       when evt.target.error.ABORT_ERR
-        console.error  "Abgebrochen."
+        console.error  "Aborted."
       else
-        console.error "Ein unbekannter Fehler ist aufgetreten."
+        console.error "Sorry, an unkown error occured."
 
 # ==============
 # = Add a test =
 # ==============
-window.TextFileReader.works  = new TextFileReader().supported()
-window.TextFileReader.ERRORS =
+window.FancyFileReader.works  = FancyFileReader.supported()
+window.FancyFileReader.ERRORS =
   MIME_TYPE_NOT_SUPPORTED:"MIME_TYPE_NOT_SUPPORTED"

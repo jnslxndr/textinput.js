@@ -1,6 +1,11 @@
 ###!
-  Paster.js helps you with entering textual content via paste
+  Paster.js – Helps you with entering textual content via paste
   supports intentional strg/cmd + v only at the moment
+
+  @license the unlicense
+  @author jens alexander ewald, 2011-2014, lea.io
+  @version 0.2.0
+  @dependson FancyFileReader.js
 !###
 
 $ ->
@@ -17,13 +22,13 @@ $ ->
         dummy.one "blur", (event) ->
           $(@).closest('.paster').removeClass("ready")
           $(@).remove()
-        
+
         dummy.one "paste", (event) ->
           $(@).closest('.paster').removeClass("ready")
-          
+
           # try to use the clipboard, else, use the dummy
           clip = event.clipboardData ? event.originalEvent.clipboardData
-          
+
           if clip
             type = clip.types ? "Text"
             data = clip.getData?(type)

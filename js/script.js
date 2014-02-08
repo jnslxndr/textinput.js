@@ -9,7 +9,7 @@
     $('#pastehere').paster(function(data) {
       return console.log("PASTER: ", data);
     });
-    $('#drophere').dropper({
+    $('.droppit').dropper({
       error: function(error) {
         return console.log("FILER error ", error);
       },

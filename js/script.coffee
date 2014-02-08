@@ -5,7 +5,7 @@ $ ->
   $('#pastehere').paster (data) ->
     console.log "PASTER: ",data
   
-  $('#drophere').dropper
+  $('.droppit').dropper
     error: (error) ->
       console.log "FILER error ",error
     success: showdata
